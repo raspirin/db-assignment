@@ -1,4 +1,12 @@
-from sqlite3 import Cursor
+from sqlite3 import Cursor, Connection
+import sqlite3
+
+
+def init() -> Connection:
+    con = sqlite3.connect('database.db')
+    con.execute("PRAGMA foreign_keys = ON;")
+    con.commit()
+    return con
 
 
 # utils
@@ -29,4 +37,47 @@ def add_customer(cur: Cursor, name: str):
     id = hash(name)
     data = (name, id)
     cur.execute("INSERT INTO CUSTOMERS VALUES (?, ?)", data)
+    commit(cur)
+
+
+# reservation
+def apply_flight_res(cur: Cursor, name: str, flight_num: str):
+    res = cur.execute("SELECT numAvail FROM FLIGHTS WHERE flightNum=?", (flight_num,))
+    res = res.fetchone()
+    if len(res) == 0:
+        raise ValueError(f"No such flight: {flight_num}")
+    num_avail = res[0]
+    if num_avail == 0:
+        raise ValueError("No available seat")
+
+    cur.execute("UPDATE FLIGHTS SET numAvail=? WHERE flightNum=?", (num_avail - 1, flight_num))
+    cur.execute("INSERT INTO RESERVATIONS (custName, resvType, resvKey) VALUES (?, ?, ?)", (name, 1, flight_num))
+    commit(cur)
+
+
+def apply_hotel_res(cur: Cursor, name: str, hotel_location: str):
+    res = cur.execute("SELECT numAvail FROM HOTELS WHERE location=?", (hotel_location,))
+    res = res.fetchone()
+    if len(res) == 0:
+        raise ValueError(f"No such hotel: {hotel_location}")
+    num_avail = res[0]
+    if num_avail == 0:
+        raise ValueError("No available room")
+
+    cur.execute("UPDATE HOTELS SET numAvail=? WHERE location=?", (num_avail - 1, hotel_location))
+    cur.execute("INSERT INTO RESERVATIONS (custName, resvType, resvKey) VALUES (?, ?, ?)", (name, 2, hotel_location))
+    commit(cur)
+
+
+def apply_bus_res(cur: Cursor, name: str, bus_location: str):
+    res = cur.execute("SELECT numAvail FROM BUS WHERE location=?", (bus_location,))
+    res = res.fetchone()
+    if len(res) == 0:
+        raise ValueError(f"No such bus: {bus_location}")
+    num_avail = res[0]
+    if num_avail == 0:
+        raise ValueError("No available seat")
+
+    cur.execute("UPDATE BUS SET numAvail=? WHERE location=?", (num_avail - 1, bus_location))
+    cur.execute("INSERT INTO RESERVATIONS (custName, resvType, resvKey) VALUES (?, ?, ?)", (name, 3, bus_location))
     commit(cur)
