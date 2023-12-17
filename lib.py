@@ -120,7 +120,6 @@ def query_route(cur: Cursor, name: str) -> Route:
 
     ret = Route()
     for i in res:
-        print(i)
         match i.ty:
             case ReservationTy.Flight:
                 flight = cur.execute("SELECT * FROM FLIGHTS WHERE flightNum=?", (i.key,)).fetchone()
