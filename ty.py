@@ -96,7 +96,6 @@ class Route:
         return f"Route: Flight: {self.flight}, Bus: {self.bus}, Hotel: {self.hotel}"
 
     def get_dict(self):
-        print("here")
         return {
             'flight': None if self.flight is None else self.flight.get_dict(),
             'bus': None if self.bus is None else self.bus.get_dict(),

@@ -63,6 +63,10 @@ def parser_init() -> ArgumentParser:
 def parse(argv: list[str], cur: Cursor):
     parser = parser_init()
     args = parser.parse_args(argv)
+    result = {
+        'success': True,
+        'msg': None,
+    }
 
     try:
         match args.command:
@@ -87,24 +91,34 @@ def parse(argv: list[str], cur: Cursor):
             case 'query':
                 match args.target:
                     case 'flight':
-                        result = list(map(lambda x: x.get_dict(), query_flights(cur)))
-                        print(dumps(result))
+                        result['msg'] = dumps(list(map(lambda x: x.get_dict(), query_flights(cur))))
+                        # print(dumps(result))
                     case 'bus':
-                        result = list(map(lambda x: x.get_dict(), query_buses(cur)))
-                        print(dumps(result))
+                        result['msg'] = dumps(list(map(lambda x: x.get_dict(), query_buses(cur))))
+                        # result = list(map(lambda x: x.get_dict(), query_buses(cur)))
+                        # print(dumps(result))
                     case 'hotel':
-                        result = list(map(lambda x: x.get_dict(), query_hotels(cur)))
-                        print(dumps(result))
+                        result['msg'] = dumps(list(map(lambda x: x.get_dict(), query_hotels(cur))))
+                        # result = list(map(lambda x: x.get_dict(), query_hotels(cur)))
+                        # print(dumps(result))
                     case 'customer':
-                        result = list(map(lambda x: x.get_dict(), query_customers(cur)))
-                        print(dumps(result))
+                        result['msg'] = dumps(list(map(lambda x: x.get_dict(), query_customers(cur))))
+                        # result = list(map(lambda x: x.get_dict(), query_customers(cur)))
+                        # print(dumps(result))
                     case 'route':
-                        result = query_route(cur, args.name).get_dict()
-                        print(dumps(result))
+                        result['msg'] = dumps(query_route(cur, args.name).get_dict())
+                        # result = query_route(cur, args.name).get_dict()
+                        # print(dumps(result))
+                    case _:
+                        raise Exception("Impossible match arm")
 
     except ValueError as e:
-        print(e)
-        return
+        result['success'] = False
+        result['msg'] = str(e)
+        # print(e)
     except Exception as e:
-        print(e)
-        return
+        result['success'] = False
+        result['msg'] = str(e)
+        # print(e)
+    finally:
+        print(dumps(result))
