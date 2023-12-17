@@ -44,7 +44,7 @@ def add_customer(cur: Cursor, name: str):
 def apply_flight_res(cur: Cursor, name: str, flight_num: str):
     res = cur.execute("SELECT numAvail FROM FLIGHTS WHERE flightNum=?", (flight_num,))
     res = res.fetchone()
-    if len(res) == 0:
+    if res is None:
         raise ValueError(f"No such flight: {flight_num}")
     num_avail = res[0]
     if num_avail == 0:
@@ -58,7 +58,7 @@ def apply_flight_res(cur: Cursor, name: str, flight_num: str):
 def apply_hotel_res(cur: Cursor, name: str, hotel_location: str):
     res = cur.execute("SELECT numAvail FROM HOTELS WHERE location=?", (hotel_location,))
     res = res.fetchone()
-    if len(res) == 0:
+    if res is None:
         raise ValueError(f"No such hotel: {hotel_location}")
     num_avail = res[0]
     if num_avail == 0:
@@ -72,7 +72,7 @@ def apply_hotel_res(cur: Cursor, name: str, hotel_location: str):
 def apply_bus_res(cur: Cursor, name: str, bus_location: str):
     res = cur.execute("SELECT numAvail FROM BUS WHERE location=?", (bus_location,))
     res = res.fetchone()
-    if len(res) == 0:
+    if res is None:
         raise ValueError(f"No such bus: {bus_location}")
     num_avail = res[0]
     if num_avail == 0:
