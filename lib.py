@@ -108,3 +108,38 @@ def query_customers(cur: Cursor) -> [Customer]:
     res = cur.execute("SELECT * FROM CUSTOMERS ORDER BY custName").fetchall()
     res = list(map(lambda x: Customer(x[0], x[1]), res))
     return res
+
+
+# route
+def query_route(cur: Cursor, name: str) -> Route:
+    exist = cur.execute("SELECT * FROM CUSTOMERS WHERE custName=?", (name,)).fetchone()
+    if exist is None:
+        raise ValueError(f"No such customer: {name}")
+    res = cur.execute("SELECT * FROM RESERVATIONS WHERE custName=?", (name,)).fetchall()
+    res = list(map(lambda x: Reservation(x[0], x[1], x[2]), res))
+
+    ret = Route()
+    for i in res:
+        print(i)
+        match i.ty:
+            case ReservationTy.Flight:
+                flight = cur.execute("SELECT * FROM FLIGHTS WHERE flightNum=?", (i.key,)).fetchone()
+                if flight is None:
+                    raise ValueError(f"Impossible flight key: {i.key}")
+                flight = Flight(flight[0], flight[1], flight[2], flight[3], flight[4], flight[5])
+                ret.set_flight(flight)
+            case ReservationTy.Hotel:
+                hotel = cur.execute("SELECT * FROM HOTELS WHERE location=?", (i.key,)).fetchone()
+                if hotel is None:
+                    raise ValueError(f"Impossible hotel location: {i.key}")
+                hotel = Hotel(hotel[0], hotel[1], hotel[2], hotel[3])
+                ret.set_hotel(hotel)
+            case ReservationTy.Bus:
+                bus = cur.execute("SELECT * FROM BUS WHERE location=?", (i.key,)).fetchone()
+                if bus is None:
+                    raise ValueError(f"Impossible bus location: {i.key}")
+                bus = Bus(bus[0], bus[1], bus[2], bus[3])
+                ret.set_bus(bus)
+            case _:
+                raise ValueError(f"Impossible match arm: {i.ty}")
+    return ret
