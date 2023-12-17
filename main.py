@@ -1,6 +1,6 @@
-import sys
+#!/usr/bin/env python
 
-from lib import *
+import sys
 from arg import *
 
 if __name__ == '__main__':
